@@ -53,11 +53,11 @@ void pager_loop (void)
 	    volatile char* dummy = (char *)faddr;
 	    *dummy;
 
-	    /* Send mapitem, note that this is a nop between threads in the 
-	       the same address space */
 	    L4_Clear (&msg);
-	    L4_Append (&msg, L4_MapItem (L4_FpageLog2 (faddr, page_bits) +
-					 L4_FullyAccessible, faddr));
+            /* Send mapitem, unless the recipient resides the same address space */
+	    if (!L4_IsLocalId(tid))
+                L4_Append (&msg, L4_MapItem (L4_FpageLog2 (faddr, page_bits) +
+                                             L4_FullyAccessible, faddr));
 	    L4_Load (&msg);
 	    tag = L4_ReplyWait (tid, &tid);
 	}
