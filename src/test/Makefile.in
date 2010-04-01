@@ -23,9 +23,5 @@ IDLS=
 LIBS+=		-ll4 -lio -lsdi
 LDFLAGS+=	-Ttext=00600000 -T $(top_builddir)/include/$(ARCH)/sdi.ld
 
-CFLAGS_powerpc+=	-fno-builtin
-CXXFLAGS_powerpc+=	-fno-rtti
-
-CFLAGS_alpha+=	-mno-fp-regs -O2 -freg-struct-return
 
 include $(top_srcdir)/Mk/prog.mk

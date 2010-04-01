@@ -25,8 +25,5 @@ LIBS+=		-ll4 -lio -lsdi
 LDFLAGS+=	-O 3 -Ttext=$(ROOTTASK_LINKBASE) -T $(top_builddir)/include/$(ARCH)/sdi.ld
 
 
-CFLAGS_powerpc+=	-fno-builtin
-CXXFLAGS_powerpc+=	-fno-rtti
-
 
 include $(top_srcdir)/Mk/prog.mk
