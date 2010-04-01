@@ -125,14 +125,18 @@ AC_PROG_LN_S
 AC_PROG_AWK
 
 dnl Configure parameters
-AC_ARG_WITH([l4dir],
+AC_ARG_WITH([l4dir],            
 	[AC_HELP_STRING([--with-l4dir=DIR],
 		[local directory of the L4 user headers and programs [[mandantory]]])],
-	[l4dir=$withval], [l4dir=no])
+	[L4DIR=$withval], [L4DIR=no])
 AC_ARG_WITH([idl4dir],
 	[AC_HELP_STRING([--with-idl4dir=DIR],
 		[local directory of the idl compiler [[guess]]])],
-	[idl4dir=$withval], [idl4dir=no])
+	[IDL4DIR=$withval], [IDL4DIR=no])
+AC_ARG_WITH([ROOTTASK_LINKBASE],
+	[AC_HELP_STRING([--with-roottask_linkbase=BASE],
+		[link-base for root task [[architecture-dependent]]])],
+	[ROOTTASK_LINKBASE=$withval], [ROOTTASK_LINKBASE=no])
 
 dnl Find prefix to use for gcc/binutils programs.
 TOOLPREFIX=`echo $CC | sed 's,gcc[[^/]]*$,,'`
@@ -171,12 +175,12 @@ fi
 
 
 dnl Checking for idl and stuff
-case $idl4dir in 
+case $IDL4DIR in 
      yes|no)
         AC_PATH_PROG([idl4config],[idl4-config])
         ;;
      *)
-        AC_PATH_PROG([idl4config],[idl4-config],,["$idl4dir/bin"])
+        AC_PATH_PROG([idl4config],[idl4-config],,["$IDL4DIR/bin"])
         ;;
 esac    
 
@@ -184,15 +188,17 @@ if test "x$idl4config" = 'x'; then
    AC_MSG_ERROR([idl4-config missing])
 fi
 
-idl4dir="`$idl4config --prefix`"
+IDL4DIR="`$idl4config --prefix`"
 
-if test "x$l4dir" = xno; then
+AC_MSG_CHECKING([L4 directory])
+if test "x$L4DIR" = xno; then
   AC_MSG_ERROR([directory of the L4 user headers and programs not set])
 fi
+AC_MSG_RESULT([yes])
 
 
 dnl Set compiler/linker flags.
-CPPFLAGS="-I\$(top_srcdir)/include -I\$(top_builddir) -I$l4dir/include -I. -I$STDARGDIR -I$l4dir/include -I$idl4dir/include -DCONFIG_ARCH_$ARCHSW $CPPFLAGS"
+CPPFLAGS="-I\$(top_srcdir)/include -I\$(top_builddir) -I$L4DIR/include -I. -I$STDARGDIR -I$L4DIR/include -I$IDL4DIR/include -DCONFIG_ARCH_$ARCHSW $CPPFLAGS"
 case $LDFLAGS in
   *-nostdlib*)
 	;;
@@ -200,14 +206,23 @@ case $LDFLAGS in
 	LDFLAGS="-nostdlib $LDFLAGS"
 	;;
 esac
-LDFLAGS="-N -L\$(top_builddir)/lib -L$LIBGCCDIR  -L$l4dir/lib/l4 $LDFLAGS"
+LDFLAGS="-N -L\$(top_builddir)/lib -L$LIBGCCDIR  -L$L4DIR/lib/l4 $LDFLAGS"
 CFLAGS="-nostdinc $CFLAGS"
 CXXFLAGS="-fno-exceptions $CXXFLAGS"
-IDL4FLAGS="-I\$(top_srcdir)/if -I\$(top_srcdir)/include -I\$(top_builddir) -I$l4dir/include -mc++ -DCONFIG_ARCH_$ARCHSW --word-size=$BITS --interface=V4 --platform=generic"
+IDL4FLAGS="-I\$(top_srcdir)/if -I\$(top_srcdir)/include -I\$(top_builddir) -I$L4DIR/include -mc++ -DCONFIG_ARCH_$ARCHSW --word-size=$BITS --interface=V4 --platform=generic"
 
 
 AC_CHECK_HEADER(l4/kip.h,, AC_MSG_ERROR([L4 headers not found -- did you specify the correct L4 path?]),[#include <l4/types.h>])
 
+dnl Architecture dependent settings.
+case $ARCH in
+  ia32)
+	default_roottask_linkbase=00300000
+	;;
+  amd64)
+       	default_roottask_linkbase=00A00000
+	;;
+esac
 
 dnl Platform dependent settings.
 case $HOST in
@@ -216,11 +231,19 @@ case $HOST in
 	;;
 esac
 
+
+case $ROOTTASK_LINKBASE in      
+  yes|no)
+	ROOTTASK_LINKBASE=$default_roottask_linkbase
+	;;
+esac
+
 AC_SUBST([CXXFLAGS])
 AC_SUBST([ARCH])
 AC_SUBST(ARCHSW)
 AC_SUBST([IDL4FLAGS])
-AC_SUBST([idl4dir])
+AC_SUBST([IDL4DIR])
+AC_SUBST([ROOTTASK_LINKBASE])
 
 
 dnl Modified files.
