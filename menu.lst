@@ -1,0 +1,13 @@
+serial --unit=0 --speed=57600
+terminal serial console
+color white/blue black/light-gray
+default 0
+#timeout 0
+
+title SdiOS
+
+kernel=(nd)/tftpboot/sdi0/kickstart
+module=(nd)/tftpboot/sdi0/x86-kernel
+module=(nd)/tftpboot/sdi0/sigma0
+module=(nd)/tftpboot/sdi0/root
+module=(nd)/tftpboot/sdi0/test
