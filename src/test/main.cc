@@ -27,7 +27,7 @@ int main () {
 
     printf ("Resolve logger ...\n");
     while (L4_IsNilThread (loggerid)) {
-	IF_LOCATOR_Locate ((CORBA_Object)locatorid, IF_LOGGING_ID, &loggerid, &env);
+        IF_LOCATOR_Locate ((CORBA_Object)locatorid, IF_LOGGING_ID, &loggerid, &env);
     }
 
     /* Printout message through logger */

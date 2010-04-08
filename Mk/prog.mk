@@ -1,8 +1,9 @@
 ######################################################################
 ##                
-## Copyright (C) 2003, 2005, 2010,  Karlsruhe University
+## Copyright (C) 2003-2004, 2010,  Karlsruhe University
 ##                
-## File path:     Makefile.in
+## File path:     prog.mk
+## Description:   Rules for building executables
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -25,24 +26,32 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##                
-## $Id: Makefile.in,v 1.3.2.5 2004/06/03 13:14:50 skoglund Exp $
+## $Id: prog.mk,v 1.4.4.3 2004/06/02 22:39:49 skoglund Exp $
 ##                
 ######################################################################
 
-srcdir=		@srcdir@
-top_srcdir=	@top_srcdir@
-top_builddir=	@top_builddir@
+include $(top_srcdir)/Mk/build.mk
 
-include $(top_srcdir)/Mk/base.mk
-
-SRCS=		panic.cc logging.cc heap.cc
-
-LIBRARY=	sdi
+do-all:		prog-all
+do-install:	prog-install
+do-clean:	prog-clean
 
 
-include $(top_srcdir)/Mk/lib.mk
+prog-all: .depend $(PROGRAM)
+
+prog-install: prog-all
+	@$(ECHO_MSG) Installing \
+	  `echo $(srcdir)/$(PROGRAM) | sed s,^$(top_srcdir)/,,`
+	$(MKDIRHIER) $(DESTDIR)$(libexecdir)
+	$(INSTALL_PROGRAM) $(PROGRAM) $(DESTDIR)$(libexecdir)/$(PROGRAM)
+
+prog-clean:
+	rm -f *~ \#* $(PROGRAM) $(OBJS) .depend
 
 
-test:
-	@echo SRCS=${SRCS}
-	@echo OBJS=${OBJS}
+$(PROGRAM): $(PROGRAM_DEPS) $(OBJS)
+	@$(ECHO_MSG) Linking `echo $(srcdir)/$@ | sed s,^$(top_srcdir)/,,`
+	$(LD) -e_start $(LDFLAGS) $(OBJS) $(LIBGCC) $(LIBS) $(LGCC) -o $@
+
+$(PROGRAM_DEPS):
+	@(cd `dirname $@` && make `basename $@`)

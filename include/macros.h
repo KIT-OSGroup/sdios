@@ -4,16 +4,6 @@
 // Description: Some usefull macros
 //
 
-#if !defined(__ARCH__)
-#if defined(CONFIG_ARCH_IA32)
-#define __ARCH__ ia32
-#endif
-
-#if defined(CONFIG_ARCH_IA64)
-#define __ARCH__ ia64
-#endif
-#endif
-
 
 #if !defined(__INCLUDE_MACROS_H__)
 #define __INCLUDE_MACROS_H__

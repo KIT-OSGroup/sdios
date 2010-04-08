@@ -1,8 +1,9 @@
 ######################################################################
 ##                
-## Copyright (C) 2003, 2005, 2010,  Karlsruhe University
+## Copyright (C) 2003, 2010,  Karlsruhe University
 ##                
-## File path:     Makefile.in
+## File path:     subdir.mk
+## Description:   Rules for building subdirectories
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -25,24 +26,28 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##                
-## $Id: Makefile.in,v 1.3.2.5 2004/06/03 13:14:50 skoglund Exp $
+## $Id: subdir.mk,v 1.6.4.1 2003/09/24 19:13:26 skoglund Exp $
 ##                
 ######################################################################
 
-srcdir=		@srcdir@
-top_srcdir=	@top_srcdir@
-top_builddir=	@top_builddir@
+include $(top_srcdir)/Mk/build.mk
 
-include $(top_srcdir)/Mk/base.mk
-
-SRCS=		panic.cc logging.cc heap.cc
-
-LIBRARY=	sdi
+do-all:		subdirs-all
+do-install:	subdirs-install
+do-clean:	subdirs-clean
 
 
-include $(top_srcdir)/Mk/lib.mk
+subdirs-all: $(MKFILE_DEPS)
+	@for D in $(SUBDIRS); do \
+	  (cd $$D && $(MAKE) all) || exit ; \
+	done
 
+subdirs-install: subdirs-all $(MKFILE_DEPS)
+	@for D in $(SUBDIRS); do \
+	  (cd $$D && $(MAKE) install) || exit ; \
+	done
 
-test:
-	@echo SRCS=${SRCS}
-	@echo OBJS=${OBJS}
+subdirs-clean: $(MKFILE_DEPS)
+	@for D in $(SUBDIRS); do \
+	  (cd $$D && $(MAKE) clean) || exit ; \
+	done

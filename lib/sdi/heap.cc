@@ -5,6 +5,7 @@
 //
 
 #include <stdlib.h>
+#include <l4io.h>
 
 #include <sdi/types.h>
 #include <sdi/sdi.h>
@@ -13,11 +14,12 @@
 
 // import symbols from crt0.S
 
-extern char __heap_start;
-extern char __heap_end;
+extern char __heap_start[];
+extern char __heap_end[];
 extern void* __heap_ptr;
 
-void* alloc (L4_Word_t size) {
+void* alloc (L4_Word_t size) 
+{
     if (__heap_ptr==NULL)
 	bailout ("__heap_ptr not initialized check *-crt0.S , halted");
     void* ret = __heap_ptr;
@@ -28,5 +30,5 @@ void* alloc (L4_Word_t size) {
 }
 
 void free (void* freeptr) {
-    panic ("free () is not implemented. Put your code in here.");
+    panic ((char *) "free () is not implemented. Put your code in here.");
 }

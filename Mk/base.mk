@@ -2,7 +2,8 @@
 ##                
 ## Copyright (C) 2003, 2005, 2010,  Karlsruhe University
 ##                
-## File path:     Makefile.in
+## File path:     base.mk
+## Description:   Generic settings for Pistachio user-level build
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -25,24 +26,37 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##                
-## $Id: Makefile.in,v 1.3.2.5 2004/06/03 13:14:50 skoglund Exp $
+## $Id: base.mk,v 1.4.4.1 2003/09/24 19:13:26 skoglund Exp $
 ##                
 ######################################################################
 
-srcdir=		@srcdir@
-top_srcdir=	@top_srcdir@
-top_builddir=	@top_builddir@
+include $(top_builddir)/config.mk
 
-include $(top_srcdir)/Mk/base.mk
+ECHO=		echo
+ECHO_MSG=	$(ECHO) ===\>
+MKDIRHIER=	$(top_srcdir)/tools/mkdirhier
 
-SRCS=		panic.cc logging.cc heap.cc
+CPPFLAGS+=	$(CPPFLAGS_$(ARCH))
+CFLAGS+=	-Wall -Wshadow  \
+		$(CFLAGS_$(ARCH))
+LDFLAGS+=	$(LDFLAGS_$(ARCH))
 
-LIBRARY=	sdi
+# Create early targets so that a make without args (implicit all) does
+# not take the first target in worker makefile (e.g., a clean target).
+
+all:		pre-all do-all post-all
+install:	pre-install do-install post-install
+clean:		pre-clean do-clean post-clean
+
+pre-all:
+pre-install:
+pre-clean:
+
+post-all:
+post-install:
+post-clean:
 
 
-include $(top_srcdir)/Mk/lib.mk
+.SUFFIXES:
+.SUFFIXES: .cc .c .S .o .mod .bin
 
-
-test:
-	@echo SRCS=${SRCS}
-	@echo OBJS=${OBJS}

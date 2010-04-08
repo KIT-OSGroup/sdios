@@ -1,8 +1,9 @@
 ######################################################################
 ##                
-## Copyright (C) 2003, 2005, 2010,  Karlsruhe University
+## Copyright (C) 2003-2004, 2010,  Karlsruhe University
 ##                
-## File path:     Makefile.in
+## File path:     lib.mk
+## Description:   Rules for building libraries
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -25,24 +26,31 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##                
-## $Id: Makefile.in,v 1.3.2.5 2004/06/03 13:14:50 skoglund Exp $
+## $Id: lib.mk,v 1.3.4.2 2004/05/19 12:55:34 skoglund Exp $
 ##                
 ######################################################################
 
-srcdir=		@srcdir@
-top_srcdir=	@top_srcdir@
-top_builddir=	@top_builddir@
+include $(top_srcdir)/Mk/build.mk
 
-include $(top_srcdir)/Mk/base.mk
-
-SRCS=		panic.cc logging.cc heap.cc
-
-LIBRARY=	sdi
+do-all:		library-all
+do-install:	library-install
+do-clean:	library-clean
 
 
-include $(top_srcdir)/Mk/lib.mk
+library-all: .depend lib$(LIBRARY).a
+
+library-install: library-all
+	@$(ECHO_MSG) Installing \
+	  `echo $(srcdir)/lib$(LIBRARY).a | sed s,^$(top_srcdir)/,,`
+	$(MKDIRHIER) $(DESTDIR)$(libdir)
+	$(INSTALL) lib$(LIBRARY).a $(DESTDIR)$(libdir)/lib$(LIBRARY).a
+
+library-clean:
+	rm -f *~ \#* lib${LIBRARY}.a $(OBJS) .depend
 
 
-test:
-	@echo SRCS=${SRCS}
-	@echo OBJS=${OBJS}
+lib$(LIBRARY).a: $(OBJS)
+	@$(ECHO_MSG) Linking `echo $(srcdir)/$@ | sed s,^$(top_srcdir)/,,`
+	$(AR) cru $@ $(OBJS)
+	$(RANLIB) $@
+	cp $@ $(top_builddir)/lib/$@

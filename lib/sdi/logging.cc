@@ -11,5 +11,5 @@
 
 
 void LogMessage (char* message) {
-    panic ("LogMessage () is not implemented. Put your code in here");
+    panic ((char *)"LogMessage () is not implemented. Put your code in here");
 }

@@ -5,7 +5,6 @@
 //
 
 #include <l4/kdebug.h>
-
 #include <l4io.h>
 
 #include <stdlib.h>
