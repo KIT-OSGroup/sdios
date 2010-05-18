@@ -208,7 +208,7 @@ case $LDFLAGS in
 esac
 LDFLAGS="-N -L\$(top_builddir)/lib -L$LIBGCCDIR  -L$L4DIR/lib/l4 $LDFLAGS"
 CFLAGS="-nostdinc $CFLAGS"
-CXXFLAGS="-fno-exceptions $CXXFLAGS"
+CXXFLAGS="-fno-exceptions $CFLAGS $CXXFLAGS"
 IDL4FLAGS="-I\$(top_srcdir)/if -I\$(top_srcdir)/include -I\$(top_builddir) -I$L4DIR/include -mc++ -DCONFIG_ARCH_$ARCHSW --word-size=$BITS --interface=V4 --platform=generic"
 
 
