@@ -10,6 +10,6 @@
 #include <sdi/sdi.h>
 
 
-void LogMessage (char* message) {
+void LogMessage (const char* message) {
     panic ((char *)"LogMessage () is not implemented. Put your code in here");
 }

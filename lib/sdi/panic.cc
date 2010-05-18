@@ -14,7 +14,7 @@
 
 /* Panic Managment */
 
-void panic (char* message) {
+void panic (const char* message) {
     while (42) {
 	printf ("\n\n%s\n\n", message);
 	L4_KDB_Enter ("panic");
