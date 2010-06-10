@@ -48,6 +48,8 @@ subdirs-install: subdirs-all $(MKFILE_DEPS)
 	done
 
 subdirs-clean: $(MKFILE_DEPS)
-	@for D in $(SUBDIRS); do \
-	  (cd $$D && $(MAKE) clean) || exit ; \
-	done
+	@if test ! -z "$SUBDIRS"; then \
+	  for D in `printf "%s\n" $(SUBDIRS) | sort -r`; do \
+	    (cd $$D && $(MAKE) clean) || exit ; \
+	  done; \
+	fi

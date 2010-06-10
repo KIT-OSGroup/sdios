@@ -37,7 +37,7 @@ do-install:	library-install
 do-clean:	library-clean
 
 
-library-all: .depend lib$(LIBRARY).a
+library-all: lib$(LIBRARY).a
 
 library-install: library-all
 	@$(ECHO_MSG) Installing \
@@ -46,7 +46,7 @@ library-install: library-all
 	$(INSTALL) lib$(LIBRARY).a $(DESTDIR)$(libdir)/lib$(LIBRARY).a
 
 library-clean:
-	rm -f *~ \#* lib${LIBRARY}.a $(OBJS) .depend
+	rm -f *~ \#* lib${LIBRARY}.a $(OBJS) $(DEPS)
 
 
 lib$(LIBRARY).a: $(OBJS)

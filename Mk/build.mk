@@ -31,8 +31,6 @@
 ######################################################################
 
 VPATH=		$(srcdir)
-MAKEFILES=	.depend
-
 MKFILE_DEPS=	Makefile \
 		$(top_srcdir)/Mk/base.mk \
 		$(top_srcdir)/Mk/build.mk \
@@ -45,38 +43,69 @@ MKFILE_DEPS=	Makefile \
 # Portable way of converting SRCS to OBJS
 
 _CC_OBJS=	${filter-out %.c %.S, ${SRCS}}
+CC_OBJS=	$(_CC_OBJS:.cc=.o)
 _C_OBJS=	${filter-out %.S %cc, ${SRCS}}
+C_OBJS=		$(_C_OBJS:.c=.o)
 _S_OBJS=	${filter-out %.c %cc, ${SRCS}}
+S_OBJS=		$(_S_OBJS:.S=.o)
 
 _IDL_STUBS=     ${filter %.idl, ${IDLS}}
 
-OBJS+=		$(_CC_OBJS:.cc=.o) $(_C_OBJS:.c=.o) $(_S_OBJS:.S=.o) \
+OBJS+=		$(CC_OBJS) $(C_OBJS) $(S_OBJS) \
 		${SRCS:C/.(cc|c|S)$/.o/g}
 
 SERV_STUBS+=  $(subst .idl,-server.h,$(_IDL_STUBS))
 CLIE_STUBS+=  $(subst .idl,-client.h,$(_IDL_STUBS))
 
-.cc.o:	$(MKFILE_DEPS)
+# Compile .cc, .c and .S files
+
+$(CC_OBJS) : %.o : %.cc $(MKFILE_DEPS) %.dep
 	@$(ECHO_MSG) `echo $< | sed s,^$(top_srcdir)/,,`
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-.c.o:	$(MKFILE_DEPS)
+$(C_OBJS) : %.o : %.c $(MKFILE_DEPS) %.dep
 	@$(ECHO_MSG) `echo $< | sed s,^$(top_srcdir)/,,`
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-.S.o:	$(MKFILE_DEPS)
+$(S_OBJS) : %.o : %.S $(MKFILE_DEPS) %.dep
 	@$(ECHO_MSG) `echo $< | sed s,^$(top_srcdir)/,,`
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 # IDL client stub code generation ...
 
-$(SERV_STUBS):	$(MKFILE_DEPS)
+$(SERV_STUBS) : %-server.h : %.idl $(MKFILE_DEPS) %.idl.dep
 		@$(ECHO_MSG) server-stub : $@
 		$(IDL4) $(IDL4FLAGS) -s -h $@ $(srcdir)/$(subst -server.h,.idl,$@)
 
-$(CLIE_STUBS):	$(MKFILE_DEPS)
+$(CLIE_STUBS) : %-client.h : %.idl $(MKFILE_DEPS) %.idl.dep
 		@$(ECHO_MSG) client-stub : $@ 
 		$(IDL4) $(IDL4FLAGS) -c -h $@ $(srcdir)/$(subst -client.h,.idl,$@)
+
+# Create dependency rules for .cc, .c, .S, .idl files.
+
+CC_DEPS=	$(CC_OBJS:.o=.dep)
+C_DEPS=		$(C_OBJS:.o=.dep)
+S_DEPS=		$(S_OBJS:.o=.dep)
+IDL_DEPS=	$(_IDL_STUBS:.idl=.idl.dep)
+DEPS=		$(CC_DEPS) $(C_DEPS) $(S_DEPS) $(_IDL_STUBS)
+
+
+$(CC_DEPS) : %.dep : %.cc
+	@$(CPP) $(CPPFLAGS) -M -MG -o - $< | sed -e 's,^\(.*[^\]\):,\1 $@ : ,' > $@
+
+$(C_DEPS) : %.dep : %.c
+	@$(CPP) $(CPPFLAGS) -M -MG -o - $< | sed -e 's,^\(.*[^\]\):,\1 $@ : ,' > $@
+
+$(S_DEPS) : %.dep : %.S
+	@$(CPP) $(CPPFLAGS) -M -MG -o - $< | sed -e 's,^\(.*[^\]\):,\1 $@ : ,' > $@
+
+$(IDL_DEPS) : %.idl.dep : %.idl
+	@sed -e 's,^import\([[:space:]]*"\),#include\1,' $< | \
+	$(CPP) $(CPPFLAGS) $(IDL4INCLUDES) -M -MG \
+	  -MT"$${stub%.idl}-client.h $${stub%.idl}-server.h $@" -o - - > $@; \
+	echo "$<" >> $@
+
+sinclude $(CC_DEPS) $(C_DEPS) $(S_DEPS)
 
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@$(ECHO_MSG) Rebuilding `echo $(srcdir)/ | sed s,^$(top_srcdir)/*,,`$@
@@ -100,14 +129,3 @@ $(top_builddir)/config.status: $(top_srcdir)/configure
 $(top_srcdir)/configure: $(top_srcdir)/configure.in
 	@$(ECHO_MSG) Rebuilding configure
 	@(cd $(top_srcdir) && $(AUTOCONF))
-
-.depend: $(SRCS)
-	@if test ! -z "$(SRCS)"; then \
-	  $(ECHO_MSG) Making dependencies in \
-	    `echo $(srcdir) | sed s,^$(top_srcdir)/,,`; \
-	  $(CC) $(CPPFLAGS) $(CFLAGS) -M -MG \
-	    `echo $(SRCS) | sed -e 's, , $(srcdir)/,g' -e 's,^,$(srcdir)/,'` \
-	    > .depend; \
-	else \
-	  touch $@; \
-	fi

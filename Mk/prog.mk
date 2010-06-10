@@ -37,7 +37,7 @@ do-install:	prog-install
 do-clean:	prog-clean
 
 
-prog-all: .depend $(PROGRAM)
+prog-all: $(PROGRAM)
 
 prog-install: prog-all
 	@$(ECHO_MSG) Installing \
@@ -46,7 +46,7 @@ prog-install: prog-all
 	$(INSTALL_PROGRAM) $(PROGRAM) $(DESTDIR)$(libexecdir)/$(PROGRAM)
 
 prog-clean:
-	rm -f *~ \#* $(PROGRAM) $(OBJS) .depend
+	rm -f *~ \#* $(PROGRAM) $(OBJS) $(DEPS)
 
 
 $(PROGRAM): $(PROGRAM_DEPS) $(OBJS)
