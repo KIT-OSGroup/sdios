@@ -99,13 +99,16 @@ $(C_DEPS) : %.dep : %.c
 $(S_DEPS) : %.dep : %.S
 	@$(CPP) $(CPPFLAGS) -M -MG -o - $< | sed -e 's,^\(.*[^\]\):,\1 $@ : ,' > $@
 
+ 
+
 $(IDL_DEPS) : %.idl.dep : %.idl
-	@sed -e 's,^import\([[:space:]]*"\),#include\1,' $< | \
+	dst="$@"; base="$${dst%.idl.dep}"; sed -e 's,^import\([[:space:]]*"\),#include\1,' $< | \
 	$(CPP) $(CPPFLAGS) $(IDL4INCLUDES) -M -MG \
-	  -MT"$${stub%.idl}-client.h $${stub%.idl}-server.h $@" -o - - > $@; \
+	  -MT"$${base}.h $${base}-client.h $${base}-server.h $@"  -o - - | \
+	sed -e 's,\(.*[^\]\)$$,\1\\,' > $@; \
 	echo "$<" >> $@
 
-sinclude $(CC_DEPS) $(C_DEPS) $(S_DEPS)
+sinclude $(CC_DEPS) $(C_DEPS) $(S_DEPS) $(IDL_DEPS)
 
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@$(ECHO_MSG) Rebuilding `echo $(srcdir)/ | sed s,^$(top_srcdir)/*,,`$@
@@ -126,6 +129,6 @@ $(top_builddir)/config.mk: $(top_srcdir)/config.mk.in $(top_builddir)/config.sta
 $(top_builddir)/config.status: $(top_srcdir)/configure
 	(cd $(top_builddir) && $(SHELL) ./config.status --recheck)
 
-$(top_srcdir)/configure: $(top_srcdir)/configure.in
+$(top_srcdir)/configure: $(top_srcdir)/configure.ac
 	@$(ECHO_MSG) Rebuilding configure
 	@(cd $(top_srcdir) && $(AUTOCONF))

@@ -209,7 +209,9 @@ esac
 LDFLAGS="-N -L\$(top_builddir)/lib -L$LIBGCCDIR  -L$L4DIR/lib/l4 $LDFLAGS"
 CFLAGS="-nostdinc $CFLAGS"
 CXXFLAGS="-fno-exceptions $CFLAGS $CXXFLAGS"
-IDL4FLAGS="-I\$(top_srcdir)/if -I\$(top_srcdir)/include -I\$(top_builddir) -I$L4DIR/include -mc++ -DCONFIG_ARCH_$ARCHSW --word-size=$BITS --interface=V4 --platform=generic"
+IDL4INCLUDES="-I\$(top_srcdir)/if -I\$(top_srcdir)/include -I\$(top_builddir) -I$L4DIR/include"
+IDL4FLAGS="$IDL4INCLUDES -mc++ -DCONFIG_ARCH_$ARCHSW --word-size=$BITS --interface=V4 --platform=generic"
+
 
 
 AC_CHECK_HEADER(l4/kip.h,, AC_MSG_ERROR([L4 headers not found -- did you specify the correct L4 path?]),[#include <l4/types.h>])
@@ -243,6 +245,7 @@ AC_SUBST([ARCH])
 AC_SUBST(ARCHSW)
 AC_SUBST([IDL4FLAGS])
 AC_SUBST([IDL4DIR])
+AC_SUBST([IDL4INCLUDES])
 AC_SUBST([ROOTTASK_LINKBASE])
 
 
