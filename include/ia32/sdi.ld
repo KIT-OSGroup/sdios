@@ -58,6 +58,7 @@ SECTIONS
 		__section_ctors_start = ABSOLUTE(.) ;
 		/* Make sure, they stay are kinda sorted and not garbage collected by the linker */
 		KEEP(SORT(*)(.ctors*))
+		KEEP(SORT(*)(.init_array*))
 		__section_ctors_end = ABSOLUTE(.) ;
 	}
 
@@ -68,6 +69,7 @@ SECTIONS
 	{
 		__section_dtors_start = ABSOLUTE(.) ;
 		KEEP(SORT(*)(.dtors*))
+		KEEP(SORT(*)(.fini_array*))
 		__section_dtors_end = ABSOLUTE(.) ;
 	}
 	__section_load_end = . ;
